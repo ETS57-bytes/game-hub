@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Game Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #02040f;
+  color: white;
+  font-family: system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ===== STAR BACKGROUND ===== */
+.stars {
+  position: fixed;
+  inset: 0;
+  height: 200%;
+  z-index: 0;
+}
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: starMove linear infinite;
+}
+@keyframes starMove {
+  to { transform: translateY(-200vh); }
+}
+
+/* ===== LOGIN ===== */
+#loginOverlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #08142c, #02040f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.login-box {
+  background: rgba(10,15,40,.85);
+  border: 1px solid #00f6ff;
+  box-shadow: 0 0 30px rgba(0,246,255,.6);
+  padding: 36px;
+  width: 340px;
+  border-radius: 22px;
+  text-align: center;
+}
+.login-box h2 { color: #00f6ff; }
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 999px;
+  border: 1px solid #2a3470;
+  background: #0f1428;
+  color: white;
+}
+.login-status { height: 20px; }
+
+/* ===== BOOT ===== */
+#bootScreen {
+  position: fixed;
+  inset: 0;
+  background: #02040f;
+  color: #00f6ff;
+  font-family: monospace;
+  padding: 40px;
+  display: none;
+  z-index: 9998;
+}
+.boot-bar {
+  margin-top: 24px;
+  border: 1px solid #00f6ff;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.boot-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #00f6ff;
+  transition: width 2s linear;
+}
+
+/* ===== APP ===== */
+.app {
+  display: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== HEADER ===== */
+header {
+  text-align: center;
+  padding: 22px;
+  border-bottom: 1px solid #1d254a;
+}
+#playerStats {
+  opacity: .7;
+  font-size: .9rem;
+  margin-top: 6px;
+}
+#dailyBtn {
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #00f6ff;
+  background: none;
+  color: #00f6ff;
+  cursor: pointer;
+  font-size: .8rem;
+}
+
+/* ===== NAV ===== */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 18px;
+}
+nav button {
+  background: none;
+  border: 1px solid #2a3470;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+nav button:hover {
+  border-color: #00f6ff;
+}
+
+/* ===== SEARCH ===== */
+.search-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+.search-wrap input {
+  width: 320px;
+  padding: 12px;
+  border-radius: 999px;
+  border: 1px solid #2a3470;
+  background: #0f1428;
+  color: white;
+}
+
+/* ===== GRID ===== */
+main { max-width: 1200px; margin: auto; padding: 30px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 36px;
+}
+
+/* ===== NEON CARDS ===== */
+.card { perspective: 1000px; }
+
+.card-inner {
+  position: relative;
+  height: 230px;
+  transform-style: preserve-3d;
+  transition: transform .7s cubic-bezier(.4,.2,.2,1);
+  cursor: pointer;
+}
+
+/* lift on hover */
+.card:hover .card-inner {
+  transform: translateY(-6px);
+}
+
+.card-inner.flipped { transform: rotateY(180deg); }
+
+.face {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #141c38, #0d1226);
+  border-radius: 24px;
+  padding: 22px;
+  backface-visibility: hidden;
+
+  /* ✨ BASE GLOW */
+  box-shadow:
+    0 0 18px rgba(0,246,255,.25),
+    inset 0 0 12px rgba(0,246,255,.08);
+
+  border: 1px solid rgba(0,246,255,.35);
+  transition: box-shadow .4s ease;
+}
+
+.back { transform: rotateY(180deg); }
+
+/* 🔥 HOVER GLOW */
+.card:hover .face {
+  box-shadow:
+    0 0 35px rgba(0,246,255,.75),
+    0 0 70px rgba(0,246,255,.35),
+    inset 0 0 18px rgba(0,246,255,.15);
+}
+
+/* 💫 FLIPPED GLOW */
+.card-inner.flipped .face {
+  box-shadow:
+    0 0 45px rgba(0,246,255,.9),
+    0 0 90px rgba(0,246,255,.45),
+    inset 0 0 22px rgba(0,246,255,.2);
+}
+
+button.play {
+  margin-top: 12px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #00f6ff;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+footer { text-align:center; opacity:.5; padding:22px; }
+</style>
+</head>
+
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2>PLAYER LOGIN</h2>
+    <input id="loginUser" placeholder="Username">
+    <input id="loginPass" type="password" placeholder="Password">
+    <div class="login-status" id="loginStatus"></div>
+    <p style="opacity:.5;font-size:.75rem">Press Enter</p>
+  </div>
+</div>
+
+<div id="bootScreen">
+  <div id="bootText"></div>
+  <div class="boot-bar"><div class="boot-bar-fill" id="bootBar"></div></div>
+</div>
+
+<div class="app">
+  <header>
+    <h1>My Game Hub</h1>
+    <div id="playerStats"></div>
+    <button id="dailyBtn" onclick="claimDailyXP()">🎁 Claim Daily XP</button>
+  </header>
+
+  <nav>
+    <button onclick="showAll()">All Games</button>
+    <button onclick="showFavorites()">⭐ Favorites</button>
+    <button onclick="playRandom()">🎲 Random</button>
+  </nav>
+
+  <div class="search-wrap">
+    <input placeholder="Search games..." oninput="searchGames(this.value)">
+  </div>
+
+  <main>
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <footer>My Game Hub © 2026</footer>
+</div>
+
+<script>
+/* ===== STARS ===== */
+const starsContainer = document.getElementById("stars");
+const STAR_COUNT = window.innerWidth < 600 ? 100 : 200;
+
+for (let i = 0; i < STAR_COUNT; i++) {
+  const star = document.createElement("div");
+  star.className = "star";
+  star.style.left = Math.random() * 100 + "vw";
+  star.style.top = Math.random() * 200 + "vh";
+  star.style.width = star.style.height = 1 + Math.random() * 2 + "px";
+  star.style.animationDuration = 20 + Math.random() * 20 + "s";
+  starsContainer.appendChild(star);
+}
+
+/* ===== LOGIN (UNCHANGED PASSWORD) ===== */
+const VALID_USER = "admin";
+const VALID_PASS = "1234";
+const app = document.querySelector(".app");
+
+function attemptLogin() {
+  loginStatus.textContent = "AUTHENTICATING...";
+  setTimeout(() => {
+    if (loginUser.value === VALID_USER && loginPass.value === VALID_PASS) {
+      loginOverlay.style.display = "none";
+      startBoot();
+    } else {
+      loginStatus.textContent = "ACCESS DENIED ❌";
+    }
+  }, 600);
+}
+document.addEventListener("keydown", e => e.key === "Enter" && attemptLogin());
+
+/* ===== BOOT ===== */
+const bootLines = [
+  "NEONCORE BIOS v3.7",
+  "SYSTEM CHECK OK",
+  "LOADING GAME HUB",
+  "BOOT COMPLETE"
+];
+
+function startBoot() {
+  bootScreen.style.display = "block";
+  bootText.innerHTML = "";
+  bootBar.style.width = "0%";
+  let i = 0;
+
+  const interval = setInterval(() => {
+    if (i < bootLines.length) {
+      bootText.innerHTML += "> " + bootLines[i++] + "<br>";
+    } else {
+      clearInterval(interval);
+      bootBar.style.width = "100%";
+      setTimeout(() => {
+        bootScreen.style.display = "none";
+        app.style.display = "block";
+        render(games);
+      }, 1500);
+    }
+  }, 400);
+}
+
+/* ===== GAME DATA ===== */
+const games = [
+  { id:"minecraft", name:"Minecraft Browser Edition ⛏️", url:"https://classic.minecraft.net", desc:"Classic Minecraft creative mode, playable directly in your browser!" },
+  { id:"run3", name:"Run 3 👟", url:"https://www.coolmathgames.com/0-run-3", desc:"Endless running platformer with gravity-defying levels." },
+  { id:"escape", name:"Escape Road 🚗", url:"https://1games.io/escape-road", desc:"Fast-paced driving game where you escape intense chases!" },
+  { id:"agar", name:"Crossy Road 🐔", url:"https://crossyroadgame.io/", desc:"Tap and jump with a chicken across roads." },
+  { id:"basket", name:"Basket Bros 🏀", url:"https://sites.google.com/site/populardoodlegames/basket-bros", desc:"Shoot and score in 1v1 or multiplayer modes!" },
+  { id:"paper", name:"Paper.io 🖌️", url:"https://paper-io.com", desc:"Capture territory while avoiding enemy trails!" },
+  { id:"headsoccer", name:"Head Soccer ⚽", url:"https://www.mathplayground.com/pg_head_soccer", desc:"Oversized heads, big goals." },
+  { id:"2048", name:"2048! 🧩", url:"https://sites.google.com/site/populardoodlegames/2048-legend", desc:"Match tiles to reach 2048." },
+  { id:"geo", name:"Geo Dash 🟦", url:"https://geometrydashspam.io/", desc:"Rhythm-based platformer." },
+  { id:"tap", name:"Tap Road 🛣️", url:"https://1games.io/tap-road/", desc: "Tap to get a new high score." },
+  { id:"space", name:"Space Shooter 🚀", url:"https://1games.io/spaceio/", desc: "Dodge and shoot other spacecraft." },
+  { id:"slope", name:"Slope 📐", url:"https://slopegame-online.com/", desc: "You are a circle and you are rolling!" }
+];
+
+const grid = document.getElementById("grid");
+let currentList = games;
+const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+const scores = JSON.parse(localStorage.getItem("scores") || "{}");
+
+/* ===== PLAYER + DAILY XP ===== */
+let player = JSON.parse(localStorage.getItem("player")) || { xp: 0, level: 1 };
+const DAILY_XP = 50;
+const today = () => new Date().toDateString();
+
+function updateLevel() {
+  player.level = Math.floor(player.xp / 100) + 1;
+  localStorage.setItem("player", JSON.stringify(player));
+}
+
+function renderPlayer() {
+  playerStats.textContent = `Level ${player.level} • XP ${player.xp}`;
+
+  if (localStorage.getItem("dailyXP") === today()) {
+    dailyBtn.textContent = "✅ Daily XP Claimed";
+    dailyBtn.disabled = true;
+    dailyBtn.style.opacity = .5;
+  } else {
+    dailyBtn.textContent = "🎁 Claim Daily XP";
+    dailyBtn.disabled = false;
+    dailyBtn.style.opacity = 1;
+  }
+}
+
+function claimDailyXP() {
+  if (localStorage.getItem("dailyXP") === today()) return;
+  player.xp += DAILY_XP;
+  updateLevel();
+  localStorage.setItem("dailyXP", today());
+  renderPlayer();
+  alert(`+${DAILY_XP} XP!`);
+}
+
+/* ===== HUB ===== */
+function render(list) {
+  renderPlayer();
+  currentList = list;
+  grid.innerHTML = "";
+
+  list.forEach(g => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-inner" onclick="flip(this)">
+        <div class="face">
+          <h2>${g.name}</h2>
+          <button class="play" onclick="event.stopPropagation(); play('${g.id}','${g.url}')">Play</button>
+          <p>🏆 ${scores[g.id] || 0}</p>
+        </div>
+        <div class="face back">
+          <p>${g.desc || ""}</p>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function flip(el){
+  el.classList.toggle("flipped");
+  el.style.transform = "";
+}
+
+function play(id, url){
+  scores[id] = (scores[id] || 0) + 1;
+  player.xp += 15;
+  updateLevel();
+  localStorage.setItem("scores", JSON.stringify(scores));
+  window.open(url, "_blank");
+  render(currentList);
+}
+
+function playRandom(){
+  const g = currentList[Math.floor(Math.random() * currentList.length)];
+  play(g.id, g.url);
+}
+function showFavorites(){ render(games.filter(g => favorites.includes(g.id))); }
+function showAll(){ render(games); }
+function searchGames(q){
+  q = q.toLowerCase();
+  render(games.filter(g => g.name.toLowerCase().includes(q)));
+}
+
+/* ===== 3D HOVER TILT ===== */
+document.addEventListener("mousemove", e => {
+  document.querySelectorAll(".card-inner").forEach(card => {
+    if (card.classList.contains("flipped")) return;
+
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left - r.width / 2) / 30;
+    const y = (e.clientY - r.top - r.height / 2) / 30;
+
+    card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+  });
+});
+
+document.addEventListener("mouseleave", () => {
+  document.querySelectorAll(".card-inner").forEach(card => {
+    card.style.transform = "";
+  });
+});
+</script>
+
+</body>
+</html>
